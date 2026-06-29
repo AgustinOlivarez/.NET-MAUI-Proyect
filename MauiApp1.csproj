@@ -3,17 +3,12 @@
 	<PropertyGroup>
 		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
-		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-		<!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen</TargetFrameworks> -->
 
-		<!-- Note for MacCatalyst:
-		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
-		When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
-		The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
-		either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
-		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
+		<TargetFrameworks>$(TargetFrameworks);net9.0</TargetFrameworks>
 
-		<OutputType>Exe</OutputType>
+		<OutputType Condition="'$(TargetFramework)' != 'net9.0'">Exe</OutputType>
+		<OutputType Condition="'$(TargetFramework)' == 'net9.0'">Library</OutputType>
+
 		<RootNamespace>MauiApp1</RootNamespace>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
@@ -63,6 +58,7 @@
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -70,16 +66,61 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include=".github\workflows\ci.yml" />
 	  <None Include="E:\Agus\Facultad\Desarrollo de aplicaciones móviles II\MauiApp1\.editorconfig" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="App.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="AppShell.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Platforms\Windows\App.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Resources\Styles\Colors.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Resources\Styles\Styles.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\AddPlayerPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\PlayerDetailPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\PlayersPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Models\" />
+	  <Folder Include="Repositories\" />
+	  <Folder Include="Services\Core\" />
+	  <Folder Include="Utils\" />
+	</ItemGroup>
+
+	<!-- Exclude other project source folders (Core, Tests) from this project's Compile include patterns -->
+	<ItemGroup>
+	  <AndroidResource Remove="MauiApp1.Core\**" />
+	  <AndroidResource Remove="MauiApp1.Tests\**" />
+	  <Compile Remove="MauiApp1.Core\**" />
+	  <Compile Remove="MauiApp1.Tests\**" />
+	  <EmbeddedResource Remove="MauiApp1.Core\**" />
+	  <EmbeddedResource Remove="MauiApp1.Tests\**" />
+	  <MauiCss Remove="MauiApp1.Core\**" />
+	  <MauiCss Remove="MauiApp1.Tests\**" />
+	  <MauiXaml Remove="MauiApp1.Core\**" />
+	  <MauiXaml Remove="MauiApp1.Tests\**" />
+	  <None Remove="MauiApp1.Core\**" />
+	  <None Remove="MauiApp1.Tests\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="MauiApp1.Core\MauiApp1.Core.csproj" />
 	</ItemGroup>
 
 </Project>
