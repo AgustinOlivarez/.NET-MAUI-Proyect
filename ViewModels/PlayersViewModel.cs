@@ -1,27 +1,30 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MauiApp1.Models;
+using MauiApp1.Models; // Asegúrate de que apunte al Core si el Player está allí
+using MauiApp1.Repositories;
 using MauiApp1.Services;
 using MauiApp1.Views;
+using System.Collections.ObjectModel;
+// using MauiApp1.Core.Repositories; // Descomenta si tu IPlayerRepository está en otro namespace
 
 namespace MauiApp1.ViewModels
 {
     public partial class PlayersViewModel : ObservableObject
     {
-        private readonly PlayerService _playerService;
-        
+        private readonly IPlayerRepository _playerRepository; // Inyectamos el repositorio local
+
         [ObservableProperty]
         private bool _isBusy;
-        
+
         [ObservableProperty]
         private string _statusMessage;
-        
+
         public ObservableCollection<Player> Players { get; } = new ObservableCollection<Player>();
 
-        public PlayersViewModel(PlayerService playerService)
+        // Agregamos el IPlayerRepository al constructor
+        public PlayersViewModel(IPlayerRepository playerRepository)
         {
-            _playerService = playerService;
+            _playerRepository = playerRepository;
         }
 
         [RelayCommand]
@@ -35,15 +38,17 @@ namespace MauiApp1.ViewModels
 
             try
             {
-                // En una aplicación real cambiamos esto a _playerService.GetPlayersAsync() 
-                // pero dado que la URL es de prueba usamos el mock
-                var players = await _playerService.GetMockPlayersAsync();
-                
-                foreach (var player in players)
+                // 2. Cargar los jugadores "Scouteados" desde SQLite (Local)
+                // Asumimos que tu repositorio tiene un método GetAllAsync()
+                var localPlayers = await _playerRepository.GetAllAsync();
+                if (localPlayers != null)
                 {
-                    Players.Add(player);
+                    foreach (var player in localPlayers)
+                    {
+                        Players.Add(player);
+                    }
                 }
-                
+
                 StatusMessage = string.Empty;
             }
             catch (HttpRequestException httpEx)
@@ -52,20 +57,20 @@ namespace MauiApp1.ViewModels
                 {
                     int statusCode = (int)httpEx.StatusCode.Value;
                     if (statusCode >= 400 && statusCode < 500)
-                        StatusMessage = $"Error del cliente ({statusCode}): Verifique la solicitud (EJ: 400/404).";
+                        StatusMessage = $"Error del cliente ({statusCode}): Verifique la solicitud.";
                     else if (statusCode >= 500)
-                        StatusMessage = $"Error del servidor ({statusCode}): Hubo un problema (EJ: 500), intente más tarde.";
+                        StatusMessage = $"Error del servidor ({statusCode}): Intente más tarde.";
                     else
                         StatusMessage = $"Error HTTP ({statusCode}): {httpEx.Message}";
                 }
                 else
                 {
-                    StatusMessage = "Problema de conexión: No se pudo conectar al servidor. Compruebe su internet.";
+                    StatusMessage = "Problema de conexión. Compruebe su internet.";
                 }
             }
             catch (Exception ex)
             {
-                StatusMessage = $"Error inesperado de datos u otros: {ex.Message}";
+                StatusMessage = $"Error inesperado: {ex.Message}";
             }
             finally
             {
@@ -77,13 +82,19 @@ namespace MauiApp1.ViewModels
         private async Task SelectPlayerAsync(Player player)
         {
             if (player == null) return;
-            
+
             var navigationParameter = new Dictionary<string, object>
             {
                 { "SelectedPlayer", player }
             };
-            
+
             await Shell.Current.GoToAsync(nameof(PlayerDetailPage), navigationParameter);
+        }
+
+        [RelayCommand]
+        private async Task GoToAddPlayerAsync()
+        {
+            await Shell.Current.GoToAsync(nameof(AddPlayerPage));
         }
     }
 }
