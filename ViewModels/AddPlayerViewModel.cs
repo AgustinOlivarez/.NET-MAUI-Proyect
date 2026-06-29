@@ -110,7 +110,6 @@ namespace MauiApp1.ViewModels
                     Posicion = Posicion,
                     Equipo = Equipo,
                     ImagePath = ImagePath ?? string.Empty,
-                    // Agregamos '?? 0.0' para convertir el double? (nulo) a double (no nulo)
                     Latitude = Latitude ?? 0.0,
                     Longitude = Longitude ?? 0.0
                 };
@@ -121,7 +120,14 @@ namespace MauiApp1.ViewModels
                 if (success)
                 {
                     try { _vibrationService.Vibrate(TimeSpan.FromMilliseconds(150)); } catch { }
+
+                    await Shell.Current.DisplayAlert("¡Registro Exitoso!", $"El jugador {player.Nombre} ha sido guardado.", "OK");
+
                     await ClearAsync();
+
+                    // Regresar a la lista automáticamente
+
+                    await Shell.Current.GoToAsync("..");
                 }
             }
             catch (Exception ex)

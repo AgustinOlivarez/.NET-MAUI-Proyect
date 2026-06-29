@@ -24,23 +24,31 @@
                         <Image Source="{Binding Player.ImagePath}" Aspect="AspectFill" />
                     </Border>
 
-                    <Label Text="{Binding Player.Nombre}" FontSize="26" FontAttributes="Bold" HorizontalOptions="Center" TextColor="#F5F5F5" />
+                    <Entry Text="{Binding Player.Nombre}" FontSize="24" FontAttributes="Bold" HorizontalTextAlignment="Center" TextColor="#F5F5F5" BackgroundColor="Transparent" />
 
                     <BoxView HeightRequest="1" Color="#2a363f" Margin="0,10" />
 
                     <Label Text="Posición" FontSize="13" TextColor="#9BA4B5" TextTransform="Uppercase" />
-                    <Label Text="{Binding Player.Posicion}" FontSize="18" FontAttributes="Bold" TextColor="#F5F5F5" />
+                    <Entry Text="{Binding Player.Posicion}" FontSize="18" FontAttributes="Bold" TextColor="#F5F5F5" BackgroundColor="Transparent" Margin="0,-10,0,0"/>
 
                     <Label Text="Equipo Actual" FontSize="13" TextColor="#9BA4B5" TextTransform="Uppercase" Margin="0,10,0,0" />
-                    <Label Text="{Binding Player.Equipo}" FontSize="18" FontAttributes="Bold" TextColor="#00E676" />
+                    <Entry Text="{Binding Player.Equipo}" FontSize="18" FontAttributes="Bold" TextColor="#00E676" BackgroundColor="Transparent" Margin="0,-10,0,0"/>
 
-                    <Label Text="Coordenadas de Scouting" FontSize="13" TextColor="#9BA4B5" TextTransform="Uppercase" Margin="0,10,0,0" />
+                    <Label Text="Coordenadas GPS" FontSize="13" TextColor="#9BA4B5" TextTransform="Uppercase" Margin="0,10,0,0" />
                     <HorizontalStackLayout Spacing="8">
                         <Label Text="LAT:" FontSize="14" FontAttributes="Bold" TextColor="#00E676" />
                         <Label Text="{Binding Player.Latitude}" FontSize="14" TextColor="#F5F5F5" />
                         <Label Text="LON:" FontSize="14" FontAttributes="Bold" TextColor="#00E676" Margin="10,0,0,0" />
                         <Label Text="{Binding Player.Longitude}" FontSize="14" TextColor="#F5F5F5" />
                     </HorizontalStackLayout>
+
+                    <Button Text="Guardar Cambios" 
+                            Command="{Binding SaveChangesCommand}" 
+                            BackgroundColor="#00E676" 
+                            TextColor="#12181b" 
+                            CornerRadius="8" 
+                            FontAttributes="Bold" 
+                            Margin="0,20,0,0"/>
 
                 </VerticalStackLayout>
             </Border>

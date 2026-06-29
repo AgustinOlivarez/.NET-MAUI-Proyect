@@ -8,57 +8,60 @@
              Title="Jugadores"
              BackgroundColor="#12181b">
 
-    <Grid RowDefinitions="Auto, Auto, *">
+    <Grid RowDefinitions="Auto, Auto, Auto, *">
+        <Label Grid.Row="0" Text="{Binding StatusMessage}" TextColor="#FF5252" HorizontalOptions="Center" Margin="10" />
 
-        <Label Grid.Row="0"
-               Text="{Binding StatusMessage}"
-               TextColor="#FF5252"
-               HorizontalOptions="Center" 
-               Margin="10" />
+        <SearchBar Grid.Row="1" 
+                   Placeholder="Buscar por nombre o posición..." 
+                   Text="{Binding SearchText}" 
+                   BackgroundColor="#12181b" 
+                   TextColor="#F5F5F5" 
+                   CancelButtonColor="#00E676" 
+                   Margin="15,0,15,10" />
 
-        <Grid Grid.Row="1" ColumnDefinitions="*, *" ColumnSpacing="15" Margin="15,0,15,10">
-
-            <Button Grid.Column="0"
-                    Text="Cargar"
-                    Command="{Binding LoadPlayersCommand}"
-                    CornerRadius="8"
-                    BackgroundColor="#1e262c"
-                    TextColor="#00E676"
-                    BorderColor="#00E676"
-                    BorderWidth="1"
-                    FontAttributes="Bold" />
-
-            <Button Grid.Column="1"
-                    Text="Agregar"
-                    Command="{Binding GoToAddPlayerCommand}"
-                    CornerRadius="8"
-                    BackgroundColor="#00E676"
-                    TextColor="#12181b"
-                    FontAttributes="Bold" />
+        <Grid Grid.Row="2" ColumnDefinitions="*, *" ColumnSpacing="15" Margin="15,0,15,10">
+            <Button Grid.Column="0" Text="Cargar" Command="{Binding LoadPlayersCommand}" CornerRadius="8" BackgroundColor="#1e262c" TextColor="#00E676" BorderColor="#00E676" BorderWidth="1" FontAttributes="Bold" />
+            <Button Grid.Column="1" Text="Agregar" Command="{Binding GoToAddPlayerCommand}" CornerRadius="8" BackgroundColor="#00E676" TextColor="#12181b" FontAttributes="Bold" />
         </Grid>
 
-        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadPlayersCommand}" RefreshColor="#00E676">
-            <CollectionView ItemsSource="{Binding Players}" 
-                            SelectionMode="Single" 
-                            SelectionChangedCommand="{Binding SelectPlayerCommand}" 
-                            SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}">
-
+        <RefreshView Grid.Row="3" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadPlayersCommand}" RefreshColor="#00E676">
+            <CollectionView ItemsSource="{Binding Players}" SelectionMode="Single" SelectionChangedCommand="{Binding SelectPlayerCommand}" SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Player">
 
-                        <Border Margin="15,8" Padding="15" Stroke="#2a363f" BackgroundColor="#1e262c">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="12" />
-                            </Border.StrokeShape>
+                        <SwipeView Margin="15,8">
+                            <SwipeView.RightItems>
+                                <SwipeItems>
+                                    <SwipeItem Text="Borrar" 
+                                               BackgroundColor="#FF5252" 
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:PlayersViewModel}}, Path=DeletePlayerCommand}" 
+                                               CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
 
-                            <Grid ColumnDefinitions="*, Auto">
-                                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                                    <Label Text="{Binding Nombre}" FontSize="18" FontAttributes="Bold" TextColor="#F5F5F5" />
-                                    <Label Text="{Binding Posicion}" FontSize="14" TextColor="#9BA4B5" />
-                                </VerticalStackLayout>
-                                <Label Grid.Column="1" Text="{Binding Equipo}" FontSize="14" FontAttributes="Bold" TextColor="#00E676" VerticalOptions="Center"/>
-                            </Grid>
-                        </Border>
+                            <Border Padding="15" Stroke="#2a363f" BackgroundColor="#1e262c">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+
+                                <Grid ColumnDefinitions="*, Auto">
+
+                                    <FlyoutBase.ContextFlyout>
+                                        <MenuFlyout>
+                                            <MenuFlyoutItem Text="Borrar Jugador" 
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:PlayersViewModel}}, Path=DeletePlayerCommand}" 
+                                                            CommandParameter="{Binding .}" />
+                                        </MenuFlyout>
+                                    </FlyoutBase.ContextFlyout>
+
+                                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                        <Label Text="{Binding Nombre}" FontSize="18" FontAttributes="Bold" TextColor="#F5F5F5" />
+                                        <Label Text="{Binding Posicion}" FontSize="14" TextColor="#9BA4B5" />
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="1" Text="{Binding Equipo}" FontSize="14" FontAttributes="Bold" TextColor="#00E676" VerticalOptions="Center"/>
+                                </Grid>
+                            </Border>
+                        </SwipeView>
 
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

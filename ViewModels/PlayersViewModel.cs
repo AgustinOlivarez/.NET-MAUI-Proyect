@@ -1,17 +1,15 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MauiApp1.Models; // Asegúrate de que apunte al Core si el Player está allí
+using MauiApp1.Models;
 using MauiApp1.Repositories;
-using MauiApp1.Services;
 using MauiApp1.Views;
 using System.Collections.ObjectModel;
-// using MauiApp1.Core.Repositories; // Descomenta si tu IPlayerRepository está en otro namespace
 
 namespace MauiApp1.ViewModels
 {
     public partial class PlayersViewModel : ObservableObject
     {
-        private readonly IPlayerRepository _playerRepository; // Inyectamos el repositorio local
+        private readonly IPlayerRepository _playerRepository;
 
         [ObservableProperty]
         private bool _isBusy;
@@ -19,12 +17,46 @@ namespace MauiApp1.ViewModels
         [ObservableProperty]
         private string _statusMessage;
 
+        // 1. NUEVO: Propiedad para el texto del buscador
+        [ObservableProperty]
+        private string _searchText = string.Empty;
+
+        // 2. NUEVO: Lista de respaldo para guardar a todos los jugadores en memoria
+        private readonly List<Player> _allPlayers = new();
+
         public ObservableCollection<Player> Players { get; } = new ObservableCollection<Player>();
 
-        // Agregamos el IPlayerRepository al constructor
         public PlayersViewModel(IPlayerRepository playerRepository)
         {
             _playerRepository = playerRepository;
+        }
+
+        // 3. NUEVO: Este método mágico se dispara automáticamente cuando "SearchText" cambia
+        partial void OnSearchTextChanged(string value)
+        {
+            FilterPlayers(value);
+        }
+
+        // 4. NUEVO: Lógica que limpia y llena la lista visible según el filtro
+        private void FilterPlayers(string searchTerm)
+        {
+            Players.Clear();
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                foreach (var p in _allPlayers)
+                    Players.Add(p);
+            }
+            else
+            {
+                var filtrados = _allPlayers.Where(p =>
+                    (p.Nombre != null && p.Nombre.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    (p.Posicion != null && p.Posicion.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
+
+                foreach (var p in filtrados)
+                    Players.Add(p);
+            }
         }
 
         [RelayCommand]
@@ -34,20 +66,20 @@ namespace MauiApp1.ViewModels
 
             IsBusy = true;
             StatusMessage = "Cargando jugadores...";
-            Players.Clear();
 
             try
             {
-                // 2. Cargar los jugadores "Scouteados" desde SQLite (Local)
-                // Asumimos que tu repositorio tiene un método GetAllAsync()
                 var localPlayers = await _playerRepository.GetAllAsync();
+
+                // Actualizamos nuestro backup en memoria
+                _allPlayers.Clear();
                 if (localPlayers != null)
                 {
-                    foreach (var player in localPlayers)
-                    {
-                        Players.Add(player);
-                    }
+                    _allPlayers.AddRange(localPlayers);
                 }
+
+                // Aplicamos el filtro actual (si no hay nada escrito, mostrará todos)
+                FilterPlayers(SearchText);
 
                 StatusMessage = string.Empty;
             }
@@ -76,6 +108,24 @@ namespace MauiApp1.ViewModels
             {
                 IsBusy = false;
             }
+        }
+
+        // 5. NUEVO: Comando para borrar jugadores (Swipe to Delete)
+        [RelayCommand]
+        private async Task DeletePlayerAsync(Player player)
+        {
+            if (player == null) return;
+
+            // Preguntamos antes de borrar para evitar accidentes
+            bool confirm = await Shell.Current.DisplayAlert("Eliminar", $"¿Dar de baja a {player.Nombre}?", "Sí", "Cancelar");
+            if (!confirm) return;
+
+            // Borramos de SQLite
+            await _playerRepository.DeleteAsync(player);
+
+            // Borramos de la memoria y actualizamos la UI
+            _allPlayers.Remove(player);
+            FilterPlayers(SearchText);
         }
 
         [RelayCommand]
