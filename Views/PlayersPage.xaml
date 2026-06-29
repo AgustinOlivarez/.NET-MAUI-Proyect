@@ -1,40 +1,68 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:MauiApp1.ViewModels"
-             xmlns:models="clr-namespace:MauiApp1.Models"
+             xmlns:models="clr-namespace:MauiApp1.Models;assembly=MauiApp1.Core"
              x:Class="MauiApp1.Views.PlayersPage"
-             Title="Jugadores">
+             x:DataType="viewmodels:PlayersViewModel"
+             Title="Jugadores"
+             BackgroundColor="#12181b">
 
     <Grid RowDefinitions="Auto, Auto, *">
-        <!-- Etiqueta de Estado -->
+
         <Label Grid.Row="0"
                Text="{Binding StatusMessage}"
-               TextColor="Red"
+               TextColor="#FF5252"
                HorizontalOptions="Center" 
                Margin="10" />
 
-        <!-- Botón de Carga -->
-        <Button Grid.Row="1"
-                Text="Cargar Jugadores"
-                Command="{Binding LoadPlayersCommand}"
-                Margin="10"
-                HorizontalOptions="Center" />
+        <Grid Grid.Row="1" ColumnDefinitions="*, *" ColumnSpacing="15" Margin="15,0,15,10">
 
-        <!-- Lista de Jugadores -->
-        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadPlayersCommand}">
-            <CollectionView ItemsSource="{Binding Players}" SelectionMode="Single" SelectionChangedCommand="{Binding SelectPlayerCommand}" SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}">
+            <Button Grid.Column="0"
+                    Text="Cargar"
+                    Command="{Binding LoadPlayersCommand}"
+                    CornerRadius="8"
+                    BackgroundColor="#1e262c"
+                    TextColor="#00E676"
+                    BorderColor="#00E676"
+                    BorderWidth="1"
+                    FontAttributes="Bold" />
+
+            <Button Grid.Column="1"
+                    Text="Agregar"
+                    Command="{Binding GoToAddPlayerCommand}"
+                    CornerRadius="8"
+                    BackgroundColor="#00E676"
+                    TextColor="#12181b"
+                    FontAttributes="Bold" />
+        </Grid>
+
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadPlayersCommand}" RefreshColor="#00E676">
+            <CollectionView ItemsSource="{Binding Players}" 
+                            SelectionMode="Single" 
+                            SelectionChangedCommand="{Binding SelectPlayerCommand}" 
+                            SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}">
+
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Player">
-                        <Frame Margin="10,5" Padding="15" CornerRadius="10">
-                            <StackLayout>
-                                <Label Text="{Binding Nombre}" FontSize="18" FontAttributes="Bold" />
-                            </StackLayout>
-                        </Frame>
+
+                        <Border Margin="15,8" Padding="15" Stroke="#2a363f" BackgroundColor="#1e262c">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+
+                            <Grid ColumnDefinitions="*, Auto">
+                                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                    <Label Text="{Binding Nombre}" FontSize="18" FontAttributes="Bold" TextColor="#F5F5F5" />
+                                    <Label Text="{Binding Posicion}" FontSize="14" TextColor="#9BA4B5" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="1" Text="{Binding Equipo}" FontSize="14" FontAttributes="Bold" TextColor="#00E676" VerticalOptions="Center"/>
+                            </Grid>
+                        </Border>
+
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </RefreshView>
     </Grid>
-
 </ContentPage>
